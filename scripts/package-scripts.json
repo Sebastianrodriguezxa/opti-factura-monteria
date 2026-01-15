@@ -1,0 +1,30 @@
+{
+  "scripts": {
+    "setup:full": "npm install && npx prisma generate && npx prisma migrate dev && npm run seed && echo '✅ Configuración completa'",
+    "dev:watch": "nodemon --watch '**/*.js' --ignore 'node_modules/' --ignore 'uploads/' --ignore 'datos_tarifas/' index.js",
+    "db:reset": "npx prisma migrate reset --force && npm run seed",
+    "db:studio": "npx prisma studio",
+    "scraper:test": "node scripts/test-scraper.js",
+    "scraper:run": "node lib/tarifas-scraper.js",
+    "backup:create": "node scripts/backup-db.js",
+    "logs:app": "tail -f logs/app.log",
+    "logs:error": "tail -f logs/error.log",
+    "logs:scraping": "tail -f logs/scraping.log",
+    "clean": "rm -rf node_modules package-lock.json && npm install",
+    "health": "curl -f http://localhost:3000/api/health || exit 1",
+    "docker:build": "docker build -t optifactura-monteria .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env optifactura-monteria",
+    "docker:compose:up": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f",
+    "production:start": "NODE_ENV=production node index.js",
+    "production:pm2": "pm2 start ecosystem.config.js",
+    "test:unit": "jest --testPathPattern=tests/unit",
+    "test:integration": "jest --testPathPattern=tests/integration",
+    "test:coverage": "jest --coverage",
+    "lint:check": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "security:audit": "npm audit",
+    "security:fix": "npm audit fix"
+  }
+}

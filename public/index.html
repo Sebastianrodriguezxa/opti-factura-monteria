@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiFactura Montería</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="img/logo.svg" alt="OptiFactura" width="30" height="30" class="d-inline-block align-top me-2">
+                OptiFactura Montería
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tarifas">Tarifas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contacto">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light ms-2" href="/login">Iniciar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero bg-light py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">Optimiza tus facturas de servicios públicos</h1>
+                    <p class="lead my-4">OptiFactura te ayuda a analizar tus facturas de electricidad, agua y gas para detectar cobros excesivos y ahorrar dinero.</p>
+                    <div class="d-flex gap-3">
+                        <a href="/registro" class="btn btn-primary btn-lg">Comenzar ahora</a>
+                        <a href="#como-funciona" class="btn btn-outline-secondary btn-lg">Cómo funciona</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="img/hero-image.svg" alt="Análisis de facturas" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="servicios" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Nuestros Servicios</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="feature-icon bg-primary bg-gradient text-white rounded-3 mb-3">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <h5 class="card-title">Análisis de Facturas Eléctricas</h5>
+                            <p class="card-text">Verificamos que tu factura de Afinia cumpla con las tarifas oficiales y detectamos cobros excesivos.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="feature-icon bg-primary bg-gradient text-white rounded-3 mb-3">
+                                <i class="bi bi-droplet"></i>
+                            </div>
+                            <h5 class="card-title">Análisis de Facturas de Agua</h5>
+                            <p class="card-text">Comparamos tu factura de Veolia con las tarifas oficiales y te alertamos sobre anomalías en el consumo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="feature-icon bg-primary bg-gradient text-white rounded-3 mb-3">
+                                <i class="bi bi-fire"></i>
+                            </div>
+                            <h5 class="card-title">Análisis de Facturas de Gas</h5>
+                            <p class="card-text">Analizamos tu factura de Surtigas para asegurar que los cobros sean correctos según las tarifas vigentes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="como-funciona" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">¿Cómo Funciona?</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="step text-center">
+                        <div class="step-number">1</div>
+                        <h5>Sube tu factura</h5>
+                        <p>Toma una foto o sube un PDF de tu factura de servicios públicos.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step text-center">
+                        <div class="step-number">2</div>
+                        <h5>Procesamiento OCR</h5>
+                        <p>Nuestro sistema extrae automáticamente los datos relevantes de tu factura.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step text-center">
+                        <div class="step-number">3</div>
+                        <h5>Análisis de tarifas</h5>
+                        <p>Comparamos con las tarifas oficiales actualizadas de los proveedores.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step text-center">
+                        <div class="step-number">4</div>
+                        <h5>Resultados y recomendaciones</h5>
+                        <p>Recibe un informe detallado con anomalías detectadas y recomendaciones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="estadisticas" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Resultados que Hablan</h2>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="stat-item">
+                        <h3 class="stat-number">15%</h3>
+                        <p class="stat-text">Ahorro promedio en facturas con anomalías</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-item">
+                        <h3 class="stat-number">1,500+</h3>
+                        <p class="stat-text">Facturas analizadas mensualmente</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-item">
+                        <h3 class="stat-number">30%</h3>
+                        <p class="stat-text">De facturas presentan alguna anomalía</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonios" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Lo que Dicen Nuestros Usuarios</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card testimonial">
+                        <div class="card-body">
+                            <p class="card-text">"Gracias a OptiFactura descubrí que me estaban cobrando un 12% más en mi factura de electricidad. Reclamé y me devolvieron el dinero."</p>
+                            <div class="d-flex align-items-center mt-3">
+                                <div class="avatar me-3">
+                                    <img src="img/avatar1.svg" alt="Usuario" class="rounded-circle" width="50" height="50">
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Carlos Martínez</h6>
+                                    <small class="text-muted">Montería, Córdoba</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card testimonial">
+                        <div class="card-body">
+                            <p class="card-text">"El sistema detectó un consumo anormal en mi factura de agua. Resultó ser una fuga que no habíamos notado. Nos ahorraron mucho dinero."</p>
+                            <div class="d-flex align-items-center mt-3">
+                                <div class="avatar me-3">
+                                    <img src="img/avatar2.svg" alt="Usuario" class="rounded-circle" width="50" height="50">
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">María López</h6>
+                                    <small class="text-muted">Montería, Córdoba</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card testimonial">
+                        <div class="card-body">
+                            <p class="card-text">"La interfaz es muy fácil de usar y el análisis es rápido. Me encanta poder ver el historial de mis facturas y comparar mi consumo mes a mes."</p>
+                            <div class="d-flex align-items-center mt-3">
+                                <div class="avatar me-3">
+                                    <img src="img/avatar3.svg" alt="Usuario" class="rounded-circle" width="50" height="50">
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Juan Pérez</h6>
+                                    <small class="text-muted">Montería, Córdoba</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cta" class="py-5 bg-primary text-white">
+        <div class="container text-center">
+            <h2 class="mb-4">¿Listo para optimizar tus facturas?</h2>
+            <p class="lead mb-4">Únete a miles de usuarios que ya están ahorrando dinero con OptiFactura</p>
+            <a href="/registro" class="btn btn-light btn-lg">Registrarse Gratis</a>
+        </div>
+    </section>
+
+    <footer class="py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>OptiFactura Montería</h5>
+                    <p>Sistema integrado para análisis de facturas de servicios públicos en Montería.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-white">Inicio</a></li>
+                        <li><a href="/servicios" class="text-white">Servicios</a></li>
+                        <li><a href="/tarifas" class="text-white">Tarifas</a></li>
+                        <li><a href="/contacto" class="text-white">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contacto</h5>
+                    <address>
+                        <p>Montería, Córdoba, Colombia</p>
+                        <p>Email: info@optifactura.co</p>
+                        <p>Teléfono: (604) 123-4567</p>
+                    </address>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2023 OptiFactura Montería. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

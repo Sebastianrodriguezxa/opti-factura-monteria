@@ -1,0 +1,8 @@
+{
+  "watch": ["index.js", "routes/", "services/", "lib/"],
+  "ext": "js,json",
+  "ignore": ["node_modules/", "uploads/", "datos_tarifas/", "resultados_analisis/"],
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

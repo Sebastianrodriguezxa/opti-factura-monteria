@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo para usuarios
+model Usuario {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  nombre          String
+  apellido        String
+  passwordHash    String
+  rol             String   @default("usuario")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  facturas        AnalisisFactura[]
+  configuraciones ConfiguracionUsuario?
+
+  @@map("usuarios")
+}
+
+// Modelo para configuraciones de usuario
+model ConfiguracionUsuario {
+  id                String   @id @default(cuid())
+  usuarioId         String   @unique
+  notificaciones    Boolean  @default(true)
+  canalesNotificacion Json    @default("{\"email\":true,\"push\":false,\"sms\":false}")
+  limiteAlertas     Float    @default(10) // Porcentaje de diferencia para alertas
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  usuario           Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@map("configuracion_usuarios")
+}
+
+// Modelo para registrar actualizaciones de tarifas
+model ActualizacionTarifas {
+  id                String   @id @default(cuid())
+  proveedor         String
+  servicio          String
+  fechaActualizacion DateTime @default(now())
+  url               String?
+  metadatos         String?  @db.Text // JSON con metadatos adicionales
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  tarifas           TarifaReferencia[]
+  subsidios         SubsidioTarifa[]
+  componentes       ComponenteTarifa[]
+
+  @@index([proveedor, servicio])
+  @@map("actualizacion_tarifas")
+}
+
+// Modelo para tarifas de referencia
+model TarifaReferencia {
+  id              String   @id @default(cuid())
+  actualizacionId String
+  proveedor       String
+  servicio        String
+  estrato         String
+  cargoFijo       Float    @default(0)
+  valorConsumo    Float
+  unidad          String   // kWh, m³
+  fechaInicio     DateTime @default(now())
+  fechaFin        DateTime? // null significa que está vigente
+  region          String   @default("Montería")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  actualizacion   ActualizacionTarifas @relation(fields: [actualizacionId], references: [id])
+
+  @@index([proveedor, servicio, estrato, region])
+  @@index([fechaInicio, fechaFin])
+  @@map("tarifa_referencia")
+}
+
+// Modelo para subsidios y contribuciones
+model SubsidioTarifa {
+  id              String   @id @default(cuid())
+  actualizacionId String
+  proveedor       String
+  servicio        String
+  estrato         String
+  porcentaje      Float    // Negativo para subsidios, positivo para contribuciones
+  fechaInicio     DateTime @default(now())
+  fechaFin        DateTime? // null significa que está vigente
+  region          String   @default("Montería")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  actualizacion   ActualizacionTarifas @relation(fields: [actualizacionId], references: [id])
+
+  @@index([proveedor, servicio, estrato])
+  @@map("subsidio_tarifa")
+}
+
+// Modelo para componentes de tarifa
+model ComponenteTarifa {
+  id              String   @id @default(cuid())
+  actualizacionId String
+  proveedor       String
+  servicio        String
+  nombre          String   // Nombre del componente (ej: "Alumbrado público", "Cargo fijo")
+  valor           Float
+  fechaRegistro   DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  actualizacion   ActualizacionTarifas @relation(fields: [actualizacionId], references: [id])
+
+  @@index([proveedor, servicio, nombre])
+  @@map("componente_tarifa")
+}
+
+// Modelo para análisis de facturas
+model AnalisisFactura {
+  id                 String   @id @default(cuid())
+  userId             String
+  proveedor          String
+  numeroFactura      String
+  fechaFactura       DateTime
+  fechaVencimiento   DateTime?
+  consumo            Float
+  unidadConsumo      String
+  valorUnitario      Float
+  valorTotal         Float
+  tarifaReferencia   Float
+  diferenciaTarifa   Float
+  porcentajeDiferencia Float
+  anomalias          String?  @db.Text // JSON con anomalías detectadas
+  recomendaciones    String?  @db.Text // JSON con recomendaciones
+  metadatos          String?  @db.Text // JSON con metadatos adicionales
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relaciones
+  usuario            Usuario  @relation(fields: [userId], references: [id])
+
+  @@index([userId, proveedor])
+  @@index([fechaFactura])
+  @@map("analisis_factura")
+}

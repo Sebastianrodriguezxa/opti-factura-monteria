@@ -1,0 +1,135 @@
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #0dcaf0;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Estilos de la barra de navegación */
+.navbar-brand img {
+  margin-right: 8px;
+}
+
+/* Estilos del hero */
+.hero {
+  padding: 80px 0;
+}
+
+.hero h1 {
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Estilos de las características */
+.feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  border-radius: 50%;
+}
+
+/* Estilos de los pasos */
+.step {
+  padding: 20px;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 15px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+/* Estilos de las estadísticas */
+.stat-item {
+  padding: 20px;
+}
+
+.stat-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.stat-text {
+  font-size: 18px;
+}
+
+/* Estilos de los testimonios */
+.testimonial {
+  height: 100%;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial .card-body {
+  padding: 30px;
+}
+
+.testimonial .card-text {
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+/* Estilos del formulario de análisis */
+.upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: var(--primary-color);
+}
+
+/* Estilos del dashboard */
+.dashboard-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+  .hero {
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .hero img {
+    margin-top: 30px;
+  }
+
+  .step-number {
+    margin-bottom: 10px;
+  }
+}
