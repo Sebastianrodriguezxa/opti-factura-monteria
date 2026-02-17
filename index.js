@@ -111,9 +111,14 @@ async function iniciarSistema() {
     console.log("🚀 Iniciando OptiFactura Montería...")
 
     // Verificar conexión a la base de datos
-    const prisma = getPrisma()
-    await prisma.$connect()
-    console.log("✅ Conexión a base de datos establecida")
+    try {
+      const prisma = getPrisma()
+      await prisma.$connect()
+      console.log("✅ Conexión a base de datos establecida")
+    } catch (dbError) {
+      console.error("⚠️ No se pudo conectar a la base de datos:", dbError.message)
+      console.log("⚠️ El servidor iniciará con funcionalidad limitada (datos de referencia)")
+    }
 
     // Iniciar servidor
     const server = app.listen(PORT, () => {
@@ -124,8 +129,12 @@ async function iniciarSistema() {
 
     // Programar tareas automáticas
     if (process.env.HABILITAR_ACTUALIZACION_AUTOMATICA === "true") {
-      await tarifasService.programarActualizacionTarifas()
-      console.log("⏰ Actualización automática de tarifas programada")
+      try {
+        tarifasService.programarActualizacionTarifas()
+        console.log("⏰ Actualización automática de tarifas programada")
+      } catch (cronError) {
+        console.error("⚠️ Error al programar actualización automática:", cronError.message)
+      }
     }
 
     // Configurar cierre graceful

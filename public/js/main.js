@@ -1,100 +1,78 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Inicializar tooltips de Bootstrap
+  // Initialize Bootstrap tooltips
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
+  tooltipTriggerList.map((el) => new bootstrap.Tooltip(el))
 
-  // Inicializar popovers de Bootstrap
+  // Initialize Bootstrap popovers
   const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-  popoverTriggerList.map((popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl))
+  popoverTriggerList.map((el) => new bootstrap.Popover(el))
 
-  // Animación de scroll suave para enlaces internos
+  // Smooth scroll for internal links
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener("click", function (e) {
       e.preventDefault()
-
       const targetId = this.getAttribute("href")
       if (targetId === "#") return
-
-      const targetElement = document.querySelector(targetId)
-      if (targetElement) {
+      const target = document.querySelector(targetId)
+      if (target) {
         window.scrollTo({
-          top: targetElement.offsetTop - 70,
+          top: target.offsetTop - 70,
           behavior: "smooth",
         })
       }
     })
   })
 
-  // Funcionalidad para el área de carga de archivos
-  const uploadArea = document.querySelector(".upload-area")
-  const fileInput = document.getElementById("factura-input")
+  // Adaptive navbar based on auth state
+  updateNavbar()
 
-  if (uploadArea && fileInput) {
-    uploadArea.addEventListener("click", () => {
-      fileInput.click()
-    })
-
-    uploadArea.addEventListener("dragover", (e) => {
-      e.preventDefault()
-      uploadArea.classList.add("border-primary")
-    })
-
-    uploadArea.addEventListener("dragleave", () => {
-      uploadArea.classList.remove("border-primary")
-    })
-
-    uploadArea.addEventListener("drop", (e) => {
-      e.preventDefault()
-      uploadArea.classList.remove("border-primary")
-
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files
-        handleFileUpload(e.dataTransfer.files[0])
+  // Navbar background on scroll
+  const navbar = document.querySelector(".navbar.fixed-top")
+  if (navbar) {
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 50) {
+        navbar.style.background = "rgba(15, 23, 42, 0.95)"
+      } else {
+        navbar.style.background = "rgba(15, 23, 42, 0.85)"
       }
     })
-
-    fileInput.addEventListener("change", (e) => {
-      if (fileInput.files.length) {
-        handleFileUpload(fileInput.files[0])
-      }
-    })
-  }
-
-  // Función para manejar la carga de archivos
-  function handleFileUpload(file) {
-    const uploadStatus = document.getElementById("upload-status")
-
-    if (uploadStatus) {
-      uploadStatus.textContent = `Archivo seleccionado: ${file.name}`
-
-      // Mostrar vista previa si es una imagen
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          const previewElement = document.getElementById("file-preview")
-          if (previewElement) {
-            previewElement.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" alt="Vista previa">`
-          }
-        }
-        reader.readAsDataURL(file)
-      }
-
-      // Habilitar botón de análisis
-      const analyzeButton = document.getElementById("analyze-button")
-      if (analyzeButton) {
-        analyzeButton.disabled = false
-      }
-    }
-  }
-
-  // Inicializar gráficos si estamos en la página de dashboard
-  if (document.getElementById("consumo-chart")) {
-    initializeCharts()
-  }
-
-  // Función para inicializar gráficos
-  function initializeCharts() {
-    // Aquí iría el código para inicializar gráficos con Chart.js o similar
-    console.log("Inicializando gráficos del dashboard")
   }
 })
+
+function updateNavbar() {
+  const token = localStorage.getItem("token")
+  const usuario = JSON.parse(localStorage.getItem("usuario") || "null")
+
+  const guestItems = document.querySelectorAll(".nav-guest")
+  const authItems = document.querySelectorAll(".nav-auth")
+  const adminItems = document.querySelectorAll(".nav-admin")
+
+  if (token && usuario) {
+    // User is logged in
+    guestItems.forEach((el) => (el.style.display = "none"))
+    authItems.forEach((el) => (el.style.display = ""))
+
+    // Update user name
+    const nombreEl = document.getElementById("usuario-nombre")
+    if (nombreEl) {
+      nombreEl.textContent = `${usuario.nombre} ${usuario.apellido}`
+    }
+
+    // Show admin items if admin role
+    if (usuario.rol === "admin") {
+      adminItems.forEach((el) => (el.style.display = ""))
+    }
+  } else {
+    // User is not logged in
+    guestItems.forEach((el) => (el.style.display = ""))
+    authItems.forEach((el) => (el.style.display = "none"))
+    adminItems.forEach((el) => (el.style.display = "none"))
+  }
+}
+
+// Global logout function
+window.logout = () => {
+  localStorage.removeItem("token")
+  localStorage.removeItem("usuario")
+  window.location.href = "/login.html"
+}

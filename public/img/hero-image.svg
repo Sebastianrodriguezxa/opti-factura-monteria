@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0.1"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Background card -->
+  <rect x="80" y="40" width="340" height="320" rx="20" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <!-- Header bar -->
+  <rect x="80" y="40" width="340" height="50" rx="20" fill="url(#g2)"/>
+  <rect x="80" y="70" width="340" height="20" fill="url(#g2)"/>
+  <!-- Header dots -->
+  <circle cx="105" cy="65" r="5" fill="#f87171" opacity="0.8"/>
+  <circle cx="122" cy="65" r="5" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="139" cy="65" r="5" fill="#34d399" opacity="0.8"/>
+  <!-- Title text -->
+  <rect x="200" y="58" width="120" height="12" rx="4" fill="rgba(255,255,255,0.7)"/>
+  <!-- Content lines -->
+  <rect x="105" y="110" width="200" height="8" rx="3" fill="#334155"/>
+  <rect x="105" y="130" width="160" height="8" rx="3" fill="#334155"/>
+  <rect x="105" y="150" width="180" height="8" rx="3" fill="#334155"/>
+  <!-- Chart area -->
+  <rect x="105" y="175" width="290" height="120" rx="10" fill="rgba(99,102,241,0.1)" stroke="#334155" stroke-width="1"/>
+  <!-- Chart bars -->
+  <rect x="125" y="245" width="25" height="40" rx="4" fill="url(#g2)" opacity="0.7"/>
+  <rect x="160" y="225" width="25" height="60" rx="4" fill="url(#g2)" opacity="0.8"/>
+  <rect x="195" y="210" width="25" height="75" rx="4" fill="url(#g2)" opacity="0.9"/>
+  <rect x="230" y="235" width="25" height="50" rx="4" fill="url(#g2)" opacity="0.75"/>
+  <rect x="265" y="200" width="25" height="85" rx="4" fill="url(#g2)"/>
+  <rect x="300" y="220" width="25" height="65" rx="4" fill="url(#g2)" opacity="0.85"/>
+  <rect x="335" y="240" width="25" height="45" rx="4" fill="url(#g3)" opacity="0.8"/>
+  <!-- Check mark badge -->
+  <circle cx="380" cy="120" r="25" fill="url(#g3)"/>
+  <path d="M368 120l7 7 14-14" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Floating elements -->
+  <circle cx="60" cy="150" r="30" fill="url(#g1)" opacity="0.5"/>
+  <circle cx="440" cy="250" r="20" fill="url(#g1)" opacity="0.3"/>
+  <circle cx="450" cy="80" r="15" fill="rgba(245,158,11,0.2)"/>
+  <!-- Bottom stats -->
+  <rect x="105" y="310" width="60" height="30" rx="8" fill="rgba(16,185,129,0.15)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+  <rect x="115" y="320" width="40" height="8" rx="3" fill="#34d399" opacity="0.7"/>
+  <rect x="180" y="310" width="60" height="30" rx="8" fill="rgba(99,102,241,0.15)" stroke="rgba(99,102,241,0.3)" stroke-width="1"/>
+  <rect x="190" y="320" width="40" height="8" rx="3" fill="#818cf8" opacity="0.7"/>
+  <rect x="255" y="310" width="60" height="30" rx="8" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+  <rect x="265" y="320" width="40" height="8" rx="3" fill="#fbbf24" opacity="0.7"/>
+</svg>

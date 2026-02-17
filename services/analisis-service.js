@@ -129,8 +129,8 @@ class AnalisisService {
       // Paso 4: Obtener datos históricos
       const historicalData = await this.obtenerDatosHistoricos(userId, proveedor)
 
-      // Paso 5: Analizar la factura con la tarifa de referencia
-      const analysisResult = await analyzeBill(extractedData, historicalData, tarifaReferencia.valor, userId)
+      // Paso 5: Analizar la factura con la tarifa de referencia completa
+      const analysisResult = await analyzeBill(extractedData, historicalData, tarifaReferencia, userId)
 
       // Paso 6: Guardar resultado del análisis
       const resultadoGuardado = await this.guardarResultadoAnalisis(

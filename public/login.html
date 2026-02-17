@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,74 +9,119 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-sm mt-5">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <img src="img/logo.svg" alt="OptiFactura" width="60" height="60">
-                            <h2 class="mt-3">Iniciar Sesión</h2>
-                            <p class="text-muted">Accede a tu cuenta de OptiFactura</p>
-                        </div>
 
-                        <div id="alert-container"></div>
+<body>
+    <div class="auth-page">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-5 auth-card animate-fadeInUp">
+                    <div class="text-center mb-4">
+                        <a href="/" class="text-decoration-none">
+                            <img src="img/logo.svg" alt="OptiFactura" width="50" height="50" class="mb-3">
+                            <h3 class="text-white">OptiFactura Montería</h3>
+                        </a>
+                    </div>
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h4 class="mb-1">Bienvenido de vuelta</h4>
+                            <p class="text-muted mb-4">Ingresa tus credenciales para continuar</p>
 
-                        <form id="login-form">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-envelope"></i>
-                                    </span>
-                                    <input type="email" class="form-control" id="email" name="email" required>
+                            <div id="alert-container"></div>
+
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Correo electrónico</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" placeholder="tu@email.com"
+                                            required>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-lock"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="toggle-password">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Contraseña</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" placeholder="••••••••"
+                                            required>
+                                        <button class="btn btn-outline-secondary" type="button" id="toggle-password"
+                                            tabindex="-1">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="remember">
+                                        <label class="form-check-label" for="remember">Recordarme</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" id="login-btn">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                                </button>
+                            </form>
+
+                            <div class="text-center">
+                                <p class="text-muted mb-0">¿No tienes cuenta? <a href="/registro">Regístrate aquí</a>
+                                </p>
                             </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember">
-                                <label class="form-check-label" for="remember">
-                                    Recordarme
-                                </label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100" id="login-btn">
-                                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                                Iniciar Sesión
-                            </button>
-                        </form>
-
-                        <div class="text-center mt-3">
-                            <p class="mb-0">¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
-                            <a href="recuperar-password.html" class="text-muted">¿Olvidaste tu contraseña?</a>
                         </div>
                     </div>
-                </div>
-
-                <div class="text-center mt-3">
-                    <a href="/" class="text-muted">
-                        <i class="bi bi-arrow-left"></i> Volver al inicio
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
+    <script>
+        // Redirect if already logged in
+        if (localStorage.getItem("token")) { window.location.href = "/dashboard.html"; }
+
+        // Toggle password visibility
+        document.getElementById("toggle-password").addEventListener("click", function () {
+            const input = document.getElementById("password");
+            const icon = this.querySelector("i");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.className = "bi bi-eye-slash";
+            } else {
+                input.type = "password";
+                icon.className = "bi bi-eye";
+            }
+        });
+
+        document.getElementById("login-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById("login-btn");
+            const alertContainer = document.getElementById("alert-container");
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Iniciando sesión...';
+            alertContainer.innerHTML = "";
+
+            try {
+                const response = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    localStorage.setItem("token", result.data.token);
+                    localStorage.setItem("usuario", JSON.stringify(result.data.usuario));
+                    window.location.href = "/dashboard.html";
+                } else {
+                    alertContainer.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>${result.message || 'Credenciales incorrectas'}</div>`;
+                }
+            } catch (error) {
+                alertContainer.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error de conexión. Verifica que el servidor esté activo.</div>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión';
+            }
+        });
+    </script>
 </body>
+
 </html>

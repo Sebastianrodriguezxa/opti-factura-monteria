@@ -24,7 +24,7 @@ router.get("/registro.html", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/registro.html"))
 })
 
-// Rutas de aplicación
+// Rutas de la app
 router.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/dashboard.html"))
 })
@@ -41,32 +41,34 @@ router.get("/analizar.html", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/analizar.html"))
 })
 
-// Rutas de información
+// Nuevas rutas
+router.get("/perfil", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/perfil.html"))
+})
+
+router.get("/configuracion", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/configuracion.html"))
+})
+
+router.get("/tarifas", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/tarifas.html"))
+})
+
+router.get("/contacto", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/contacto.html"))
+})
+
+router.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/admin.html"))
+})
+
+// Términos
 router.get("/terminos", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/terminos.html"))
 })
 
 router.get("/terminos.html", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/terminos.html"))
-})
-
-// Ruta de estado del sistema
-router.get("/status", (req, res) => {
-  res.json({
-    status: "online",
-    version: "1.0.0",
-    timestamp: new Date().toISOString(),
-    server: "OptiFactura Montería",
-    environment: process.env.NODE_ENV || "development",
-  })
-})
-
-// Ruta para verificar conexión
-router.get("/health", (req, res) => {
-  res.json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-  })
 })
 
 module.exports = router

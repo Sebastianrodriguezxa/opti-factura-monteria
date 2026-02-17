@@ -274,11 +274,10 @@ class AnalizadorFacturas {
         <i class="bi bi-${estadoIcon}" style="font-size: 2rem;"></i>
         <h4 class="mt-2">${estadoTexto}</h4>
         <p class="mb-0">
-          ${
-            tieneAnomalias
-              ? `Se detectaron ${anomalias.length} anomalía(s) en tu factura`
-              : "Tu factura no presenta anomalías detectables"
-          }
+          ${tieneAnomalias
+        ? `Se detectaron ${anomalias.length} anomalía(s) en tu factura`
+        : "Tu factura no presenta anomalías detectables"
+      }
         </p>
       </div>
 
@@ -310,25 +309,23 @@ class AnalizadorFacturas {
                 <tr><td><strong>Consumo:</strong></td><td>${extractedData.consumption} ${extractedData.consumptionUnit}</td></tr>
                 <tr><td><strong>Precio unitario:</strong></td><td>$${extractedData.unitPrice?.toLocaleString() || "No detectado"}</td></tr>
                 <tr><td><strong>Total facturado:</strong></td><td>$${extractedData.totalAmount?.toLocaleString() || "No detectado"}</td></tr>
-                ${
-                  analysisResult.tarifaReferencia
-                    ? `
+                ${analysisResult.tarifaReferencia
+        ? `
                 <tr><td><strong>Tarifa referencia:</strong></td><td>$${analysisResult.tarifaReferencia.valor?.toLocaleString()}</td></tr>
                 <tr><td><strong>Diferencia:</strong></td><td class="${analysisResult.tarifaDifference > 0 ? "text-danger" : "text-success"}">
                   ${analysisResult.tarifaDifference > 0 ? "+" : ""}$${analysisResult.tarifaDifference?.toLocaleString() || "0"}
                 </td></tr>
                 `
-                    : ""
-                }
+        : ""
+      }
               </table>
             </div>
           </div>
         </div>
       </div>
 
-      ${
-        anomalias.length > 0
-          ? `
+      ${anomalias.length > 0
+        ? `
       <!-- Anomalías detectadas -->
       <div class="card mb-4">
         <div class="card-header bg-warning">
@@ -336,8 +333,8 @@ class AnalizadorFacturas {
         </div>
         <div class="card-body">
           ${anomalias
-            .map(
-              (anomalia) => `
+          .map(
+            (anomalia) => `
             <div class="alert alert-${this.getSeverityClass(anomalia.severity)}">
               <div class="d-flex">
                 <div class="me-3">
@@ -351,17 +348,16 @@ class AnalizadorFacturas {
               </div>
             </div>
           `,
-            )
-            .join("")}
+          )
+          .join("")}
         </div>
       </div>
       `
-          : ""
+        : ""
       }
 
-      ${
-        analysisResult.recommendations && analysisResult.recommendations.length > 0
-          ? `
+      ${analysisResult.recommendations && analysisResult.recommendations.length > 0
+        ? `
       <!-- Recomendaciones -->
       <div class="card mb-4">
         <div class="card-header bg-info text-white">
@@ -370,20 +366,20 @@ class AnalizadorFacturas {
         <div class="card-body">
           <ul class="list-group list-group-flush">
             ${analysisResult.recommendations
-              .map(
-                (rec) => `
+          .map(
+            (rec) => `
               <li class="list-group-item">
                 <i class="bi bi-arrow-right text-primary me-2"></i>
                 ${rec.description}
               </li>
             `,
-              )
-              .join("")}
+          )
+          .join("")}
           </ul>
         </div>
       </div>
       `
-          : ""
+        : ""
       }
 
       <!-- Acciones -->
@@ -430,6 +426,7 @@ class AnalizadorFacturas {
   getAnomalyTitle(type) {
     const titles = {
       tariff_overcharge: "Sobrecobro en Tarifa",
+      unjustified_charge: "Cobro No Justificado",
       high_consumption: "Consumo Elevado",
       low_consumption: "Consumo Inusualmente Bajo",
       billing_inconsistency: "Inconsistencia en Facturación",
@@ -490,11 +487,10 @@ ANOMALÍAS DETECTADAS:
 ${anomalias.length > 0 ? anomalias.map((a, i) => `${i + 1}. ${a.description} (${a.severity.toUpperCase()})`).join("\n") : "No se detectaron anomalías"}
 
 RECOMENDACIONES:
-${
-  analysisResult.recommendations && analysisResult.recommendations.length > 0
-    ? analysisResult.recommendations.map((r, i) => `${i + 1}. ${r.description}`).join("\n")
-    : "No hay recomendaciones específicas"
-}
+${analysisResult.recommendations && analysisResult.recommendations.length > 0
+        ? analysisResult.recommendations.map((r, i) => `${i + 1}. ${r.description}`).join("\n")
+        : "No hay recomendaciones específicas"
+      }
 
 Reporte generado el ${new Date().toLocaleString("es-ES")}
 OptiFactura Montería - Sistema de Análisis de Facturas

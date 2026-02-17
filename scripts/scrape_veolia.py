@@ -38,6 +38,38 @@ HEADERS = {
     'Accept-Language': 'es-CO,es;q=0.9',
 }
 
+# Subsidios oficiales CRA para Acueducto y Alcantarillado (fallback si no se extraen)
+# Según regulación CRA - Máximos permitidos por ley
+# Los municipios pueden aplicar porcentajes menores
+SUBSIDIOS_CRA_AGUA = {
+    '1': -70,  # Estrato 1: hasta -70%
+    '2': -40,  # Estrato 2: hasta -40%
+    '3': -15,  # Estrato 3: hasta -15%
+    '4': 0,    # Estrato 4: sin subsidio ni contribución
+    '5': 20,   # Estrato 5: contribución +20%
+    '6': 20,   # Estrato 6: contribución +20%
+    'Comercial': 20,
+    'Industrial': 20,
+    'Oficial': 0
+}
+
+
+def obtener_subsidio_cra(estrato: str, subsidios_extraidos: Optional[Dict] = None) -> float:
+    """
+    Obtiene el subsidio para un estrato.
+    Usa subsidios extraídos del PDF/página si están disponibles,
+    sino usa valores CRA oficiales como fallback.
+    """
+    if subsidios_extraidos:
+        # Buscar coincidencia exacta o por número de estrato
+        if estrato in subsidios_extraidos:
+            return subsidios_extraidos[estrato]
+        # Intentar extraer solo el número si es "Estrato X"
+        match = re.search(r'(\d)', str(estrato))
+        if match and match.group(1) in subsidios_extraidos:
+            return subsidios_extraidos[match.group(1)]
+    return SUBSIDIOS_CRA_AGUA.get(estrato, 0)
+
 
 def encontrar_pdf_mas_reciente(soup: BeautifulSoup) -> Optional[Dict[str, str]]:
     """
@@ -243,16 +275,8 @@ def extraer_tarifas_de_pdf(pdf_path: str) -> Dict[str, Any]:
                                 if not tarifa and valores:
                                     tarifa = valores[0]['value']
                                 
-                                # Determinar subsidio basado en estrato
-                                subsidio = 0
-                                if estrato == '1':
-                                    subsidio = -50
-                                elif estrato == '2':
-                                    subsidio = -40
-                                elif estrato == '3':
-                                    subsidio = -15
-                                elif estrato in ['5', '6']:
-                                    subsidio = 20
+                                # Obtener subsidio usando función centralizada (extraído o CRA)
+                                subsidio = obtener_subsidio_cra(estrato, {s['estrato']: s['porcentaje'] for s in subsidios} if subsidios else None)
                                 
                                 # Evitar duplicados
                                 if not any(t['estrato'] == estrato for t in tarifas):
@@ -334,13 +358,8 @@ def extraer_tarifas_de_html(soup: BeautifulSoup) -> List[Dict]:
                         tarifa = next((v for v in valores if 500 < v < 10000), valores[0])
                         cargo_fijo = next((v for v in valores if 3000 < v < 100000 and v != tarifa), 0)
                         
-                        subsidio = 0
-                        if estrato == '1':
-                            subsidio = -50
-                        elif estrato == '2':
-                            subsidio = -40
-                        elif estrato == '3':
-                            subsidio = -15
+                        # Obtener subsidio usando función centralizada
+                        subsidio = obtener_subsidio_cra(estrato)
                         
                         if not any(t['estrato'] == estrato for t in tarifas):
                             tarifas.append({

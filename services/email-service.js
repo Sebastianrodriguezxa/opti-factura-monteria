@@ -22,16 +22,16 @@ class EmailService {
     if (this.inicializado) return
 
     try {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: this.options.host,
         port: this.options.port,
         secure: this.options.secure,
         auth:
           this.options.user && this.options.pass
             ? {
-                user: this.options.user,
-                pass: this.options.pass,
-              }
+              user: this.options.user,
+              pass: this.options.pass,
+            }
             : undefined,
       })
 
@@ -151,14 +151,13 @@ class EmailService {
         </tr>
       </table>
       
-      ${
-        anomalias.length > 0
-          ? `
+      ${anomalias.length > 0
+        ? `
         <h2>⚠️ Anomalías Detectadas</h2>
         <ul>
           ${anomalias
-            .map(
-              (anomalia) => `
+          .map(
+            (anomalia) => `
             <li>
               <strong>${anomalia.type}:</strong> ${anomalia.description}
               <span style="color: ${anomalia.severity === "high" ? "red" : anomalia.severity === "medium" ? "orange" : "blue"};">
@@ -166,22 +165,21 @@ class EmailService {
               </span>
             </li>
           `,
-            )
-            .join("")}
+          )
+          .join("")}
         </ul>
       `
-          : "<p>✅ No se detectaron anomalías en tu factura.</p>"
+        : "<p>✅ No se detectaron anomalías en tu factura.</p>"
       }
       
-      ${
-        analysisResult.recommendations && analysisResult.recommendations.length > 0
-          ? `
+      ${analysisResult.recommendations && analysisResult.recommendations.length > 0
+        ? `
         <h2>💡 Recomendaciones</h2>
         <ul>
           ${analysisResult.recommendations.map((rec) => `<li>${rec.description}</li>`).join("")}
         </ul>
       `
-          : ""
+        : ""
       }
       
       <p><a href="${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard" style="background-color: #0d6efd; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Ver Análisis Completo</a></p>

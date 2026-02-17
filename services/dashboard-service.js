@@ -28,12 +28,10 @@ class DashboardService {
   async obtenerEstadisticasGenerales(userId) {
     try {
       const [totalFacturas, facturasMesActual, ahorroTotal, anomaliasDetectadas] = await Promise.all([
-        // Total de facturas analizadas
         this.prisma.analisisFactura.count({
           where: { userId },
         }),
 
-        // Facturas del mes actual
         this.prisma.analisisFactura.count({
           where: {
             userId,
@@ -43,7 +41,6 @@ class DashboardService {
           },
         }),
 
-        // Ahorro total estimado
         this.prisma.analisisFactura.aggregate({
           where: {
             userId,
@@ -54,7 +51,6 @@ class DashboardService {
           },
         }),
 
-        // Anomalías detectadas
         this.prisma.analisisFactura.count({
           where: {
             userId,
@@ -74,7 +70,14 @@ class DashboardService {
       }
     } catch (error) {
       console.error("Error al obtener estadísticas generales:", error.message)
-      throw error
+      // Retornar datos vacíos en lugar de fallar
+      return {
+        totalFacturas: 0,
+        facturasMesActual: 0,
+        ahorroTotal: 0,
+        anomaliasDetectadas: 0,
+        porcentajeAnomalias: 0,
+      }
     }
   }
 
@@ -82,7 +85,7 @@ class DashboardService {
    * Obtiene datos de consumo por mes
    * @param {string} userId ID del usuario
    * @param {number} meses Número de meses hacia atrás
-   * @returns {Promise<Array>} Datos de consumo mensual
+   * @returns {Promise<Object>} Datos de consumo mensual
    */
   async obtenerConsumoMensual(userId, meses = 12) {
     try {
@@ -136,7 +139,7 @@ class DashboardService {
       return consumoPorMes
     } catch (error) {
       console.error("Error al obtener consumo mensual:", error.message)
-      throw error
+      return {}
     }
   }
 
@@ -177,7 +180,7 @@ class DashboardService {
       }))
     } catch (error) {
       console.error("Error al obtener distribución de gastos:", error.message)
-      throw error
+      return []
     }
   }
 
@@ -237,7 +240,7 @@ class DashboardService {
       return anomalias.slice(0, limite)
     } catch (error) {
       console.error("Error al obtener últimas anomalías:", error.message)
-      throw error
+      return []
     }
   }
 
@@ -297,7 +300,7 @@ class DashboardService {
       return comparacion
     } catch (error) {
       console.error("Error al obtener comparación de tarifas:", error.message)
-      throw error
+      return {}
     }
   }
 
@@ -369,10 +372,31 @@ class DashboardService {
         })
       }
 
+      // Si no hay recomendaciones, dar una general
+      if (recomendaciones.length === 0) {
+        recomendaciones.push({
+          tipo: "bienvenida",
+          titulo: "¡Bienvenido a OptiFactura!",
+          descripcion:
+            "Sube tu primera factura de servicios públicos (Afinia, Veolia, Surtigas) para comenzar a detectar cobros excesivos y optimizar tus gastos.",
+          prioridad: "baja",
+          accion: "Analizar primera factura",
+        })
+      }
+
       return recomendaciones
     } catch (error) {
       console.error("Error al obtener recomendaciones:", error.message)
-      throw error
+      return [
+        {
+          tipo: "bienvenida",
+          titulo: "¡Bienvenido a OptiFactura!",
+          descripcion:
+            "Sube tu primera factura de servicios públicos para comenzar a detectar cobros excesivos.",
+          prioridad: "baja",
+          accion: "Analizar primera factura",
+        },
+      ]
     }
   }
 }

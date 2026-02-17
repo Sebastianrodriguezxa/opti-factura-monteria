@@ -38,6 +38,23 @@ HEADERS = {
     'Accept-Language': 'es-CO,es;q=0.9',
 }
 
+# Subsidios oficiales CREG para Electricidad (fallback si no se extraen de la página)
+# Según regulación CREG vigente
+# Aplican solo al consumo de subsistencia (173 kWh/mes para Montería < 1000 msnm)
+SUBSIDIOS_CREG_ELECTRICIDAD = {
+    '1': -60,  # Estrato 1: hasta -60%
+    '2': -50,  # Estrato 2: hasta -50%
+    '3': -15,  # Estrato 3: hasta -15%
+    '4': 0,    # Estrato 4: sin subsidio ni contribución
+    '5': 20,   # Estrato 5: contribución +20%
+    '6': 20,   # Estrato 6: contribución +20%
+    'Comercial': 20,
+    'Industrial': 20,
+    'Oficial': 0
+}
+
+CONSUMO_SUBSISTENCIA_ELECTRICIDAD = 173  # kWh/mes para municipios < 1000 msnm
+
 
 def encontrar_pdf_mas_reciente(soup: BeautifulSoup) -> Optional[Dict[str, str]]:
     """
@@ -319,23 +336,29 @@ def extraer_tarifas_de_pdf(pdf_path: str) -> Dict[str, Any]:
 def calcular_tarifas_por_estrato(cu_base: float, subsidios: Dict[str, float]) -> List[Dict]:
     """
     Calcula las tarifas por estrato basándose en el CU y los subsidios.
+    Usa subsidios extraídos de la página, o fallback a regulación CREG.
     Subsidios para estratos 1-3, contribución del 20% para estratos 5-6.
     """
     tarifas = []
     
     # Estratos residenciales
     for estrato in ['1', '2', '3', '4', '5', '6']:
-        subsidio_porcentaje = subsidios.get(estrato, 0)
+        # Usar subsidio extraído si existe, sino usar CREG
+        if estrato in subsidios:
+            subsidio_porcentaje = subsidios[estrato]
+        else:
+            subsidio_porcentaje = SUBSIDIOS_CREG_ELECTRICIDAD.get(estrato, 0)
+            print(f"  Usando subsidio CREG para estrato {estrato}: {subsidio_porcentaje}%", file=sys.stderr)
         
         if estrato in ['5', '6']:
             # Contribución del 20%
-            subsidio_porcentaje = 20
-            tarifa_final = cu_base * 1.20
+            subsidio_porcentaje = subsidios.get(estrato, 20)
+            tarifa_final = cu_base * (1 + subsidio_porcentaje / 100)
         elif estrato == '4':
             # Sin subsidio ni contribución
             tarifa_final = cu_base
         else:
-            # Con subsidio
+            # Con subsidio (valor negativo)
             factor = 1 + (subsidio_porcentaje / 100)  # subsidio es negativo
             tarifa_final = cu_base * factor
         
@@ -343,16 +366,19 @@ def calcular_tarifas_por_estrato(cu_base: float, subsidios: Dict[str, float]) ->
             "estrato": estrato,
             "tarifa": round(tarifa_final, 2),
             "cargoFijo": 0,  # Se extraerá del PDF si está disponible
-            "subsidio": subsidio_porcentaje
+            "subsidio": subsidio_porcentaje,
+            "fuente_subsidio": "extraído" if estrato in subsidios else "CREG"
         })
     
     # Comercial e Industrial (con contribución del 20%)
     for tipo in ['Comercial', 'Industrial']:
+        contribucion = SUBSIDIOS_CREG_ELECTRICIDAD.get(tipo, 20)
         tarifas.append({
             "estrato": tipo,
-            "tarifa": round(cu_base * 1.20, 2),
+            "tarifa": round(cu_base * (1 + contribucion / 100), 2),
             "cargoFijo": 0,
-            "subsidio": 20
+            "subsidio": contribucion,
+            "fuente_subsidio": "CREG"
         })
     
     return tarifas
@@ -441,6 +467,10 @@ def scrape_afinia() -> Dict[str, Any]:
             resultado["sugerencia"] = "La estructura de la página pudo haber cambiado. Revisar manualmente: " + TARIFAS_URL
         else:
             print(f"\n=== Extracción completada: {len(resultado['tarifas'])} tarifas ===", file=sys.stderr)
+        
+        # Agregar metadata de consumo de subsistencia
+        resultado["consumo_subsistencia"] = CONSUMO_SUBSISTENCIA_ELECTRICIDAD
+        resultado["nota_subsidios"] = "Subsidios aplican solo al consumo de subsistencia (173 kWh/mes para Montería)"
         
         return resultado
         

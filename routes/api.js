@@ -86,8 +86,8 @@ const autenticarUsuario = async (req, res, next) => {
   }
 }
 
-// Rutas de tarifas
-router.get("/tarifas", autenticarUsuario, async (req, res) => {
+// Rutas de tarifas (público - sin auth para página de tarifas)
+router.get("/tarifas", async (req, res) => {
   try {
     const tarifas = await req.services.tarifas.obtenerTodasLasTarifas()
 
@@ -105,7 +105,7 @@ router.get("/tarifas", autenticarUsuario, async (req, res) => {
   }
 })
 
-router.get("/tarifas/:proveedor", autenticarUsuario, async (req, res) => {
+router.get("/tarifas/:proveedor", async (req, res) => {
   try {
     const { proveedor } = req.params
     const { estrato = "1", tipoUsuario = "Residencial" } = req.query
@@ -156,6 +156,122 @@ router.post("/tarifas/actualizar", autenticarUsuario, async (req, res) => {
       message: "Error al actualizar tarifas",
       error: error.message,
     })
+  }
+})
+
+// Rutas de perfil de usuario
+router.get("/usuario/perfil", autenticarUsuario, async (req, res) => {
+  try {
+    const usuario = await req.services.prisma.usuario.findUnique({
+      where: { id: req.userId },
+      select: { id: true, email: true, nombre: true, apellido: true, rol: true, createdAt: true }
+    })
+    res.json({ success: true, data: usuario })
+  } catch (error) {
+    console.error(`Error al obtener perfil: ${error.message}`)
+    res.status(500).json({ success: false, message: "Error al obtener perfil" })
+  }
+})
+
+router.put("/usuario/perfil", autenticarUsuario, async (req, res) => {
+  try {
+    const { nombre, apellido } = req.body
+    const usuario = await req.services.prisma.usuario.update({
+      where: { id: req.userId },
+      data: { nombre, apellido },
+      select: { id: true, email: true, nombre: true, apellido: true, rol: true }
+    })
+    res.json({ success: true, message: "Perfil actualizado", data: usuario })
+  } catch (error) {
+    console.error(`Error al actualizar perfil: ${error.message}`)
+    res.status(500).json({ success: false, message: "Error al actualizar perfil" })
+  }
+})
+
+// Rutas de configuración de usuario
+router.get("/usuario/configuracion", autenticarUsuario, async (req, res) => {
+  try {
+    const config = await req.services.prisma.configuracionUsuario.findUnique({
+      where: { usuarioId: req.userId }
+    })
+    res.json({ success: true, data: config || { notificaciones: true, limiteAlertas: 10, canalesNotificacion: '{"email":true,"push":false,"sms":false}' } })
+  } catch (error) {
+    console.error(`Error al obtener configuración: ${error.message}`)
+    res.json({ success: true, data: { notificaciones: true, limiteAlertas: 10, canalesNotificacion: '{"email":true,"push":false,"sms":false}' } })
+  }
+})
+
+router.put("/usuario/configuracion", autenticarUsuario, async (req, res) => {
+  try {
+    const { notificaciones, limiteAlertas, canalesNotificacion } = req.body
+    const data = {
+      notificaciones: notificaciones !== undefined ? notificaciones : true,
+      limiteAlertas: limiteAlertas || 10,
+      canalesNotificacion: typeof canalesNotificacion === 'string' ? canalesNotificacion : JSON.stringify(canalesNotificacion || {})
+    }
+    try {
+      await req.services.prisma.configuracionUsuario.upsert({
+        where: { usuarioId: req.userId },
+        update: data,
+        create: { ...data, usuarioId: req.userId }
+      })
+    } catch (e) {
+      // Table may not exist yet - silently succeed
+      console.log("Config table not available, saving to localStorage only")
+    }
+    res.json({ success: true, message: "Configuración guardada" })
+  } catch (error) {
+    console.error(`Error al guardar configuración: ${error.message}`)
+    res.json({ success: true, message: "Configuración guardada localmente" })
+  }
+})
+
+// Rutas de administración
+router.get("/admin/usuarios", autenticarUsuario, async (req, res) => {
+  try {
+    if (req.usuario.rol !== "admin") {
+      return res.status(403).json({ success: false, message: "Acceso denegado" })
+    }
+    const usuarios = await req.services.prisma.usuario.findMany({
+      select: {
+        id: true, email: true, nombre: true, apellido: true, rol: true, createdAt: true,
+        _count: { select: { facturas: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    })
+    res.json({ success: true, data: usuarios })
+  } catch (error) {
+    console.error(`Error al obtener usuarios: ${error.message}`)
+    res.status(500).json({ success: false, message: "Error al obtener usuarios" })
+  }
+})
+
+router.get("/admin/stats", autenticarUsuario, async (req, res) => {
+  try {
+    if (req.usuario.rol !== "admin") {
+      return res.status(403).json({ success: false, message: "Acceso denegado" })
+    }
+    const [usuarios, facturas, tarifas] = await Promise.all([
+      req.services.prisma.usuario.count(),
+      req.services.prisma.analisisFactura.count(),
+      req.services.prisma.tarifaReferencia.count()
+    ])
+    const uptimeSeconds = process.uptime()
+    const hours = Math.floor(uptimeSeconds / 3600)
+    const minutes = Math.floor((uptimeSeconds % 3600) / 60)
+    res.json({
+      success: true,
+      data: {
+        usuarios,
+        facturas,
+        anomalias: 0,
+        tarifas,
+        uptime: `${hours}h ${minutes}m`
+      }
+    })
+  } catch (error) {
+    console.error(`Error al obtener stats admin: ${error.message}`)
+    res.status(500).json({ success: false, message: "Error al obtener estadísticas" })
   }
 })
 

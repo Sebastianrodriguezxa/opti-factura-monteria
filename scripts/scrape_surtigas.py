@@ -37,6 +37,23 @@ except ImportError as e:
 TARIFAS_URL = "https://www.surtigas.com.co/informacion-tarifaria"
 TIMEOUT = 30
 
+# Subsidios oficiales CREG para Gas Natural (fallback si no se extraen de la página)
+# Según regulación CREG - Resolución 105_5 de 2022
+# Aplican solo al consumo de subsistencia (20 m³/mes)
+SUBSIDIOS_CREG_GAS = {
+    '1': -60,  # Estrato 1: hasta -60%
+    '2': -50,  # Estrato 2: hasta -50%
+    '3': 0,    # Estrato 3: sin subsidio
+    '4': 0,    # Estrato 4: sin subsidio ni contribución
+    '5': 20,   # Estrato 5: contribución +20%
+    '6': 20,   # Estrato 6: contribución +20%
+    'Comercial': 20,
+    'Industrial': 20,
+    'GNV': 0
+}
+
+CONSUMO_SUBSISTENCIA_GAS = 20  # m³/mes según regulación CREG
+
 
 def extraer_numero(texto: str) -> float:
     """Extrae un número de un texto."""
@@ -59,6 +76,73 @@ def extraer_numero(texto: str) -> float:
         return float(limpio)
     except ValueError:
         return 0.0
+
+
+def extraer_subsidios_de_pagina(driver) -> Optional[Dict[str, float]]:
+    """
+    Intenta extraer los porcentajes de subsidio reales de la página de Surtigas.
+    Busca patrones como "Estrato 1: 60%" o tablas con información de subsidios.
+    Si no encuentra, retorna None para usar los valores CREG como fallback.
+    """
+    subsidios_extraidos = {}
+    
+    try:
+        # Buscar en el texto de la página
+        body = driver.find_element(By.TAG_NAME, "body")
+        texto = body.text.lower()
+        
+        # Patrones para buscar subsidios
+        patrones = [
+            r'estrato\s*(\d)[^0-9]*subsidio[^0-9]*([\d.,]+)\s*%',
+            r'estrato\s*(\d)[^0-9]*([\d.,]+)\s*%\s*(?:subsidio|descuento)',
+            r'subsidio[^0-9]*estrato\s*(\d)[^0-9]*([\d.,]+)\s*%',
+        ]
+        
+        for patron in patrones:
+            matches = re.findall(patron, texto)
+            for estrato, porcentaje in matches:
+                if estrato in ['1', '2', '3']:
+                    valor = extraer_numero(porcentaje)
+                    if 0 < valor <= 70:  # Rango válido de subsidio
+                        subsidios_extraidos[estrato] = -valor
+                        print(f"  Subsidio extraído de página: Estrato {estrato} = -{valor}%", file=sys.stderr)
+        
+        # Buscar en tablas
+        tablas = driver.find_elements(By.TAG_NAME, "table")
+        for tabla in tablas:
+            filas = tabla.find_elements(By.TAG_NAME, "tr")
+            for fila in filas:
+                texto_fila = fila.text.lower()
+                if 'subsidio' in texto_fila or '%' in texto_fila:
+                    for estrato in ['1', '2', '3']:
+                        if f'estrato {estrato}' in texto_fila or f'estrato{estrato}' in texto_fila:
+                            match = re.search(r'([\d.,]+)\s*%', texto_fila)
+                            if match:
+                                valor = extraer_numero(match.group(1))
+                                if 0 < valor <= 70 and estrato not in subsidios_extraidos:
+                                    subsidios_extraidos[estrato] = -valor
+                                    print(f"  Subsidio de tabla: Estrato {estrato} = -{valor}%", file=sys.stderr)
+        
+        if subsidios_extraidos:
+            print(f"  Subsidios extraídos de la página: {subsidios_extraidos}", file=sys.stderr)
+            return subsidios_extraidos
+        else:
+            print("  No se encontraron subsidios en la página, usando valores CREG", file=sys.stderr)
+            return None
+            
+    except Exception as e:
+        print(f"Error extrayendo subsidios: {str(e)}", file=sys.stderr)
+        return None
+
+
+def obtener_subsidio(estrato: str, subsidios_extraidos: Optional[Dict] = None) -> float:
+    """
+    Obtiene el subsidio para un estrato.
+    Usa subsidios extraídos si están disponibles, sino usa valores CREG oficiales.
+    """
+    if subsidios_extraidos and estrato in subsidios_extraidos:
+        return subsidios_extraidos[estrato]
+    return SUBSIDIOS_CREG_GAS.get(estrato, 0)
 
 
 def crear_driver() -> webdriver.Chrome:
@@ -84,10 +168,11 @@ def crear_driver() -> webdriver.Chrome:
         raise
 
 
-def extraer_tarifas_de_tabla(driver: webdriver.Chrome) -> List[Dict]:
+def extraer_tarifas_de_tabla(driver: webdriver.Chrome, subsidios_extraidos: Optional[Dict] = None) -> List[Dict]:
     """
     Extrae tarifas de las tablas en la página.
     Busca tablas con información de estratos y tarifas.
+    Usa subsidios extraídos o fallback a CREG.
     """
     tarifas = []
     
@@ -144,16 +229,8 @@ def extraer_tarifas_de_tabla(driver: webdriver.Chrome) -> List[Dict]:
                                 tarifa = next((v for v in valores if 500 < v < 10000), valores[0] if valores else 0)
                                 cargo_fijo = next((v for v in valores if 3000 < v < 100000 and v != tarifa), 0)
                                 
-                                # Determinar subsidio por estrato
-                                subsidio = 0
-                                if estrato == '1':
-                                    subsidio = -50
-                                elif estrato == '2':
-                                    subsidio = -40
-                                elif estrato == '3':
-                                    subsidio = -15
-                                elif estrato in ['5', '6']:
-                                    subsidio = 20
+                                # Obtener subsidio (extraído o CREG)
+                                subsidio = obtener_subsidio(estrato, subsidios_extraidos)
                                 
                                 tarifa_data = {
                                     "estrato": estrato,
@@ -177,10 +254,11 @@ def extraer_tarifas_de_tabla(driver: webdriver.Chrome) -> List[Dict]:
     return tarifas
 
 
-def extraer_tarifas_de_texto(driver: webdriver.Chrome) -> List[Dict]:
+def extraer_tarifas_de_texto(driver: webdriver.Chrome, subsidios_extraidos: Optional[Dict] = None) -> List[Dict]:
     """
     Extrae tarifas del texto de la página si no hay tablas claras.
     Busca patrones como "Estrato 1: $X.XXX/m³"
+    Usa subsidios extraídos o fallback a CREG.
     """
     tarifas = []
     
@@ -202,13 +280,8 @@ def extraer_tarifas_de_texto(driver: webdriver.Chrome) -> List[Dict]:
             for estrato, valor in matches:
                 tarifa = extraer_numero(valor)
                 if 500 < tarifa < 10000 and not any(t['estrato'] == estrato for t in tarifas):
-                    subsidio = 0
-                    if estrato == '1':
-                        subsidio = -50
-                    elif estrato == '2':
-                        subsidio = -40
-                    elif estrato == '3':
-                        subsidio = -15
+                    # Obtener subsidio (extraído o CREG)
+                    subsidio = obtener_subsidio(estrato, subsidios_extraidos)
                     
                     tarifas.append({
                         "estrato": estrato,
@@ -308,23 +381,27 @@ def scrape_surtigas() -> Dict[str, Any]:
         # Esperar carga inicial
         time.sleep(3)
         
-        # Paso 3: Intentar extraer tarifas de tablas
-        print("Paso 3: Extrayendo tarifas de tablas...", file=sys.stderr)
-        tarifas = extraer_tarifas_de_tabla(driver)
+        # Paso 3: Extraer subsidios de la página
+        print("Paso 3: Extrayendo subsidios de la página...", file=sys.stderr)
+        subsidios_extraidos = extraer_subsidios_de_pagina(driver)
         
-        # Paso 4: Si no hay tablas, buscar en texto
+        # Paso 4: Extraer tarifas de tablas
+        print("Paso 4: Extrayendo tarifas de tablas...", file=sys.stderr)
+        tarifas = extraer_tarifas_de_tabla(driver, subsidios_extraidos)
+        
+        # Paso 5: Si no hay tablas, buscar en texto
         if not tarifas:
-            print("Paso 4: Buscando tarifas en texto...", file=sys.stderr)
-            tarifas = extraer_tarifas_de_texto(driver)
+            print("Paso 5: Buscando tarifas en texto...", file=sys.stderr)
+            tarifas = extraer_tarifas_de_texto(driver, subsidios_extraidos)
         
-        # Paso 5: Buscar PDF de tarifas
-        print("Paso 5: Buscando PDF de tarifas...", file=sys.stderr)
+        # Paso 6: Buscar PDF de tarifas
+        print("Paso 6: Buscando PDF de tarifas...", file=sys.stderr)
         pdf_url = buscar_pdf_tarifas(driver)
         if pdf_url:
             resultado["pdf_url"] = pdf_url
         
-        # Paso 6: Extraer componentes
-        print("Paso 6: Extrayendo componentes de tarifa...", file=sys.stderr)
+        # Paso 7: Extraer componentes
+        print("Paso 7: Extrayendo componentes de tarifa...", file=sys.stderr)
         componentes = extraer_componentes(driver)
         if componentes:
             resultado["componentes"] = componentes
@@ -332,13 +409,19 @@ def scrape_surtigas() -> Dict[str, Any]:
         # Asignar tarifas al resultado
         resultado["tarifas"] = tarifas
         
-        # Generar subsidios basados en tarifas extraídas
+        # Generar subsidios (usar extraídos o CREG)
         for tarifa in tarifas:
-            if tarifa.get("subsidio") and tarifa["estrato"] in ['1', '2', '3']:
+            subsidio = tarifa.get("subsidio", 0)
+            if subsidio != 0:
                 resultado["subsidios"].append({
                     "estrato": tarifa["estrato"],
-                    "porcentaje": tarifa["subsidio"]
+                    "porcentaje": subsidio,
+                    "fuente": "extraído" if subsidios_extraidos and tarifa["estrato"] in subsidios_extraidos else "CREG"
                 })
+        
+        # Agregar metadata de consumo de subsistencia
+        resultado["consumo_subsistencia"] = CONSUMO_SUBSISTENCIA_GAS
+        resultado["nota_subsidios"] = "Subsidios aplican solo al consumo de subsistencia (20 m³/mes)"
         
         # Verificar que obtuvimos datos
         if not resultado["tarifas"]:
